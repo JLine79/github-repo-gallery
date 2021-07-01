@@ -4,6 +4,10 @@ const userName = "JLine79";
 //Select ul for repository display
 const repoList = document.querySelector(".repo-list")
 
+//Select and show repo data
+const repoSection = document.querySelector(".repos")
+const repoIndividualData = document.querySelector(".repo-data")
+
 //Fetch API JSON data
 const getInfo = async function () {
     const data = await fetch (`https://api.github.com/users/${userName}`)
@@ -48,3 +52,43 @@ const displayRepo = function (repos) {
         repoList.append(addRepo)
     }
 }
+
+//Event when an individual repo is clicked
+const selectRepo = repoList.addEventListener ("click", function (e) {
+    if (e.target.matches("h3")) {
+        const repoName = e.target.innerText
+        repoSpecs(repoName)
+    }
+})
+
+//Get information about specific repository on click
+const repoSpecs = async function (repoName) {
+    const singleRepoData = await fetch (`https://api.github.com/repos/${userName}/${repoName}`)
+    const repoInfo = await singleRepoData.json()
+    console.log(repoInfo)
+    // Fetch language info from individual repo
+    const fetchLanguages = await fetch (`https://api.github.com/repos/${userName}/${repoName}/languages`)
+    const languageData = await fetchLanguages.json()
+    //console.log(languageData)
+    const languages = []
+    for (let key in languageData) {
+        languages.push(key)
+    }
+    //console.log(languages)
+    displayRepoInfo(repoInfo, languages)
+}
+
+//Display specific repo information
+const displayRepoInfo = function (repoInfo, languages) {
+    repoIndividualData.innerHTML = ""
+    const createRepoElement = document.createElement("div")
+    createRepoElement.innerHTML = `<h3>Name: ${repoInfo.name}</h3>
+    <p>Description: ${repoInfo.description}</p>
+    <p>Default Branch: ${repoInfo.default_branch}</p>
+    <p>Languages: ${languages.join(", ")}</p>
+    <a class="visit" href="${repoInfo.html_url}" target="_blank" rel="noreferrer noopener">View Repo on GitHub!</a>`
+    repoIndividualData.append(createRepoElement)
+    repoIndividualData.classList.remove("hide")
+    repoSection.classList.add("hide")
+}
+
