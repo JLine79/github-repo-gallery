@@ -1,6 +1,9 @@
 //Select overview element
 const overview = document.querySelector(".overview");
 const userName = "JLine79";
+//Select ul for repository display
+const repoList = document.querySelector(".repo-list")
+
 //Fetch API JSON data
 const getInfo = async function () {
     const data = await fetch (`https://api.github.com/users/${userName}`)
@@ -24,4 +27,24 @@ const displayInfo = function (result) {
                                 <p><strong>Number of public repos:</strong> ${result.public_repos}</p>
                             </div> `
     overview.append(userInfo);
+}
+
+//Fetch repository information from GitHub user profile
+const getRepositories = async function () {
+    const repoData = await fetch (`https://api.github.com/users/${userName}/repos?sort=created&per_page=100`)
+    const repos = await repoData.json()
+    displayRepo(repos)
+    //console.log(repos)
+}
+
+getRepositories()
+
+//Display info about repos
+const displayRepo = function (repos) {
+    for (const repo of repos) {
+        const addRepo = document.createElement("li")
+        addRepo.classList.add("repo")
+        addRepo.innerHTML = `<h3>${repo.name}</h3>`
+        repoList.append(addRepo)
+    }
 }
