@@ -8,6 +8,10 @@ const repoList = document.querySelector(".repo-list")
 const repoSection = document.querySelector(".repos")
 const repoIndividualData = document.querySelector(".repo-data")
 
+//Back to Repo button and search input placeholder
+const backToRepoButton = document.querySelector(".view-repos")
+const filterInput = document.querySelector(".filter-repos")
+
 //Fetch API JSON data
 const getInfo = async function () {
     const data = await fetch (`https://api.github.com/users/${userName}`)
@@ -45,6 +49,7 @@ getRepositories()
 
 //Display info about repos
 const displayRepo = function (repos) {
+    filterInput.classList.remove("hide")
     for (const repo of repos) {
         const addRepo = document.createElement("li")
         addRepo.classList.add("repo")
@@ -65,14 +70,14 @@ const selectRepo = repoList.addEventListener ("click", function (e) {
 const repoSpecs = async function (repoName) {
     const singleRepoData = await fetch (`https://api.github.com/repos/${userName}/${repoName}`)
     const repoInfo = await singleRepoData.json()
-    console.log(repoInfo)
+    //console.log(repoInfo)
     // Fetch language info from individual repo
     const fetchLanguages = await fetch (`https://api.github.com/repos/${userName}/${repoName}/languages`)
     const languageData = await fetchLanguages.json()
     //console.log(languageData)
     const languages = []
-    for (let key in languageData) {
-        languages.push(key)
+    for (let language in languageData) {
+        languages.push(language)
     }
     //console.log(languages)
     displayRepoInfo(repoInfo, languages)
@@ -82,13 +87,39 @@ const repoSpecs = async function (repoName) {
 const displayRepoInfo = function (repoInfo, languages) {
     repoIndividualData.innerHTML = ""
     const createRepoElement = document.createElement("div")
-    createRepoElement.innerHTML = `<h3>Name: ${repoInfo.name}</h3>
-    <p>Description: ${repoInfo.description}</p>
-    <p>Default Branch: ${repoInfo.default_branch}</p>
-    <p>Languages: ${languages.join(", ")}</p>
-    <a class="visit" href="${repoInfo.html_url}" target="_blank" rel="noreferrer noopener">View Repo on GitHub!</a>`
+    createRepoElement.innerHTML = `
+        <h3>Name: ${repoInfo.name}</h3>
+        <p>Description: ${repoInfo.description}</p>
+        <p>Default Branch: ${repoInfo.default_branch}</p>
+        <p>Languages: ${languages.join(", ")}</p>
+        <a class="visit" href="${repoInfo.html_url}" target="_blank" rel="noreferrer noopener">View Repo on GitHub!</a>`
     repoIndividualData.append(createRepoElement)
     repoIndividualData.classList.remove("hide")
     repoSection.classList.add("hide")
+    backToRepoButton.classList.remove("hide")
 }
 
+//Back to repos button add click event
+const backButton = backToRepoButton.addEventListener ("click", function () {
+    repoSection.classList.remove("hide")
+    repoIndividualData.classList.add("hide")
+    backToRepoButton.classList.add("hide")
+})
+
+//Filter input listen event
+filterInput.addEventListener ("input", function (e) {
+    const searchTextValue = e.target.value
+    //console.log(searchTextValue)
+    const repos = document.querySelectorAll(".repo")
+    const searchIdentifier = searchTextValue.toLowerCase()
+    for (const repo of repos) {
+        const singleRepo = repo.innerText.toLowerCase()
+        if (singleRepo.includes(searchIdentifier)) {
+            repo.classList.remove("hide")
+        }
+
+        else {
+            repo.classList.add("hide")
+        }
+    }
+})
